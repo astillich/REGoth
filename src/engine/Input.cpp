@@ -2,14 +2,14 @@
 
 using namespace Engine;
 
-ActionBinding::ActionBinding(ActionType actionType, bool isContinuous, bool isInverted)
+Input::ActionBinding::ActionBinding(ActionType actionType, bool isContinuous, bool isInverted)
     : actionType(actionType)
     , isContinuous(isContinuous)
     , isInverted(isInverted)
 {
 }
 
-bool ActionBinding::operator <(const ActionBinding &other) const
+bool Input::ActionBinding::operator <(const ActionBinding &other) const
 {
     if(actionType < other.actionType)
         return true;
@@ -38,9 +38,9 @@ Action::Action(std::function<void (bool, float)> func)
 {
 }
 
-std::map<ActionBinding, int /* key */> Input::actionBindingToKeyMap;
-std::map<ActionBinding, int /*mouseButton*/> Input::actionBindingToMouseButtonMap;
-std::map<ActionBinding, Input::MouseAxis> Input::actionBindingToMouseAxisMap;
+std::set<std::pair<Input::ActionBinding, int>> Input::actionBindingToKeySet;
+std::set<std::pair<Input::ActionBinding, int /*mouseButton*/>> Input::actionBindingToMouseButtonSet;
+std::set<std::pair<Input::ActionBinding, Input::MouseAxis>> Input::actionBindingToMouseAxisSet;
 
 std::multimap<ActionType, Action> Input::actionTypeToActionMap;
 
@@ -61,13 +61,13 @@ std::function<void(bool /* lock */)> Input::mouseLockCallback;
 float Input::windowHalfHeight;
 float Input::windowHalfWidth;
 
-Action* Input::RegisterAction(ActionType actionType, std::function<void (bool, float)> function)
+Action* Input::registerAction(ActionType actionType, std::function<void (bool, float)> function)
 {
     // Returns pointer to inserted Action object
     return &(( *actionTypeToActionMap.insert( std::make_pair(actionType, Action(function)) ) ).second);
 }
 
-bool Input::RemoveAction(ActionType actionType, Action *action)
+bool Input::removeAction(ActionType actionType, Action *action)
 {
     auto rangeIterators = actionTypeToActionMap.equal_range(actionType);
     bool hasActionBeenFound = false;
@@ -89,17 +89,17 @@ Math::float2 Input::getMouseCoordinates()
 
 void Input::bindKey(int key, ActionType actionType, bool isContinuous, bool isInverted)
 {
-    actionBindingToKeyMap[ActionBinding(actionType, isContinuous, isInverted)] = key;
+    actionBindingToKeySet.insert(std::make_pair(Input::ActionBinding(actionType, isContinuous, isInverted), key));
 }
 
 void Input::bindMouseButton(int mouseButton, ActionType actionType, bool isContinuous, bool isInverted)
 {
-    actionBindingToMouseButtonMap[ActionBinding(actionType, isContinuous, isInverted)] = mouseButton;
+    actionBindingToMouseButtonSet.insert(std::make_pair(Input::ActionBinding(actionType, isContinuous, isInverted), mouseButton));
 }
 
 void Input::bindMouseAxis(MouseAxis mouseAxis, ActionType actionType, bool isContinuous, bool isInverted)
 {
-    actionBindingToMouseAxisMap[ActionBinding(actionType, isContinuous, isInverted)] = mouseAxis;
+    actionBindingToMouseAxisSet.insert(std::make_pair(Input::ActionBinding(actionType, isContinuous, isInverted), mouseAxis));
 }
 
 void Input::keyEvent(GLFWwindow *window, int key, int scancode, int action, int mods)
@@ -193,7 +193,7 @@ void Input::setMouseLockCallback(std::function<void (bool)> callback)
 
 void Input::fireBindings()
 {
-    for(const auto itBindingToKey : actionBindingToKeyMap)
+    for(const auto itBindingToKey : actionBindingToKeySet)
     {
         //                             is key currently pressed   AND ( is continuous                    OR key has just been triggered )
         bool triggerAction = keyState.test(itBindingToKey.second) && ( itBindingToKey.first.isContinuous || keyTriggered.test(itBindingToKey.second) );
@@ -212,7 +212,7 @@ void Input::fireBindings()
         keyTriggered[itBindingToKey.second] = false;
     }
 
-    for(const auto itBindingToButton : actionBindingToMouseButtonMap)
+    for(const auto itBindingToButton : actionBindingToMouseButtonSet)
     {
         bool triggerAction = mouseButtonState.test(itBindingToButton.second) && ( itBindingToButton.first.isContinuous || mouseButtonTriggered.test(itBindingToButton.second) );
         // Button causes a constant intensity of 1.0 when pressed
@@ -236,7 +236,7 @@ void Input::fireBindings()
     mousePosition.x = axisPosition[static_cast<std::size_t>(MouseAxis::CursorX)];
     mousePosition.y = axisPosition[static_cast<std::size_t>(MouseAxis::CursorY)];
 
-    for(const auto itBindingToAxis : actionBindingToMouseAxisMap)
+    for(const auto itBindingToAxis : actionBindingToMouseAxisSet)
     {
         const size_t &mouseAxisIndex = static_cast<std::size_t>(itBindingToAxis.second);
         bool triggerAction = mouseAxisState.test(mouseAxisIndex) && (itBindingToAxis.first.isContinuous || mouseAxisTriggered.test(mouseAxisIndex));

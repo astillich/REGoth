@@ -27,7 +27,7 @@ Sky::Sky(World::WorldInstance& world) :
     m_MasterState.time = 0.0f;
     fillSkyStates();
 
-    Engine::Input::RegisterAction(Engine::ActionType::DebugSkySpeed, [this](bool, float intensity)
+    Engine::Input::registerAction(Engine::ActionType::DebugSkySpeed, [this](bool, float intensity)
     {
         m_skySpeedMultiplier = 1.0 + 9.0 * intensity;
     });

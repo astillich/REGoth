@@ -31,6 +31,12 @@
 
 using namespace Engine;
 
+Platform::Platform()
+    : isRunning(true)
+    , window(nullptr)
+{
+}
+
 int32_t Platform::run(int argc, char** argv)
 {
     constexpr int width = 1280;
@@ -118,7 +124,7 @@ int32_t Platform::run(int argc, char** argv)
     // Viewer Camera Controller
     bindMouseAxis(MouseAxis::CursorX, ActionType::ViewerHorizontal, true);
     bindMouseAxis(MouseAxis::CursorY, ActionType::ViewerVertical, true);
-    bindMouseButton(GLFW_MOUSE_BUTTON_MIDDLE, ActionType::ViewerRotate, true);
+    bindMouseButton(GLFW_MOUSE_BUTTON_RIGHT, ActionType::ViewerRotate, true);
     bindMouseButton(GLFW_MOUSE_BUTTON_LEFT, ActionType::ViewerClick, false);
     bindKey(GLFW_KEY_LEFT_SHIFT, ActionType::ViewerPan, true);
     bindKey(GLFW_KEY_LEFT_CONTROL, ActionType::ViewerZoom, true);
@@ -131,6 +137,15 @@ int32_t Platform::run(int argc, char** argv)
     bindKey(GLFW_KEY_RIGHT, ActionType::PlayerTurnRight, true);
     bindKey(GLFW_KEY_A, ActionType::PlayerStrafeLeft, true);
     bindKey(GLFW_KEY_D, ActionType::PlayerStrafeRight, true);
+    bindKey(GLFW_KEY_Q, ActionType::PlayerAttackFist, true);
+
+    bindKey(GLFW_KEY_A, ActionType::WeaponAnimationAttackLeft, true);
+    bindKey(GLFW_KEY_D, ActionType::WeaponAnimationAttackRight, true);
+    bindKey(GLFW_KEY_W, ActionType::WeaponAnimationRun, true);
+    bindKey(GLFW_KEY_S, ActionType::WeaponAnimationBackpedal, true);
+    bindKey(GLFW_KEY_Q, ActionType::WeaponAnimationAttack, true);
+
+    bindKey(GLFW_KEY_SPACE, ActionType::DebugMoveSpeed, true);
 
 //    // special keys test
 //    bindKey(GLFW_KEY_LEFT_SHIFT, ActionType::PlayerForward, true);
@@ -153,6 +168,7 @@ int32_t Platform::run(int argc, char** argv)
         //glfwPollEvents();
         glfwWaitEvents();
     }
+    isRunning = false;
 
     thread.join();
     glfwTerminate();

@@ -2,6 +2,8 @@
 // Created by desktop on 11.08.16.
 //
 
+#if 0
+
 #include "DialogManager.h"
 #include <engine/World.h>
 #include <utils/logger.h>
@@ -244,3 +246,4 @@ void DialogManager::init()
     m_World.getEngine()->getRootUIView().addChild(m_ActiveSubtitleBox);
 }
 
+#endif

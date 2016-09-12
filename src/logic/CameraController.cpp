@@ -9,6 +9,8 @@
 #include <components/VobClasses.h>
 #include "engine/Input.h"
 
+#include <iostream>
+
 Logic::CameraController::CameraController(World::WorldInstance& world, Handle::EntityHandle entity)
     : Controller(world, entity),
       m_Active(true),
@@ -37,19 +39,19 @@ Logic::CameraController::CameraController(World::WorldInstance& world, Handle::E
         auto &settings = m_CameraSettings.floatingCameraSettings;
         auto &firstPerson = m_CameraSettings.firstPersonCameraSettings;
 
-        firstPerson.actionMoveForward = Input::RegisterAction(ActionType::FirstPersonMoveForward, [&settings](bool, float intensity)
+        firstPerson.actionMoveForward = Input::registerAction(ActionType::FirstPersonMoveForward, [&settings](bool, float intensity)
         {
             settings.position += 0.1f * intensity * settings.forward;
         });
-        firstPerson.actionMoveRight = Input::RegisterAction(ActionType::FirstPersonMoveRight, [&settings](bool, float intensity)
+        firstPerson.actionMoveRight = Input::registerAction(ActionType::FirstPersonMoveRight, [&settings](bool, float intensity)
         {
             settings.position -= 0.1f * intensity * settings.right;
         });
-        firstPerson.actionLookHorizontal = Input::RegisterAction(ActionType::FirstPersonLookHorizontal, [&settings](bool, float intensity)
+        firstPerson.actionLookHorizontal = Input::registerAction(ActionType::FirstPersonLookHorizontal, [&settings](bool, float intensity)
         {
             settings.yaw += 0.02f * intensity;
         });
-        firstPerson.actionLookVertical = Input::RegisterAction(ActionType::FirstPersonLookVertical, [&settings](bool, float intensity)
+        firstPerson.actionLookVertical = Input::registerAction(ActionType::FirstPersonLookVertical, [&settings](bool, float intensity)
         {
             settings.pitch += 0.02f * intensity;
         });
@@ -61,23 +63,23 @@ Logic::CameraController::CameraController(World::WorldInstance& world, Handle::E
         auto &settings = m_CameraSettings.floatingCameraSettings;
         auto &free = m_CameraSettings.freeCameraSettings;
 
-        free.actionMoveForward = Input::RegisterAction(ActionType::FreeMoveForward, [&settings](bool, float intensity)
+        free.actionMoveForward = Input::registerAction(ActionType::FreeMoveForward, [&settings](bool, float intensity)
         {
             settings.position += 0.1f * intensity * settings.forward;
         });
-        free.actionMoveRight = Input::RegisterAction(ActionType::FreeMoveRight, [&settings](bool, float intensity)
+        free.actionMoveRight = Input::registerAction(ActionType::FreeMoveRight, [&settings](bool, float intensity)
         {
             settings.position -= 0.1f * intensity * settings.right;
         });
-        free.actionMoveUp = Input::RegisterAction(ActionType::FreeMoveUp, [&settings](bool, float intensity)
+        free.actionMoveUp = Input::registerAction(ActionType::FreeMoveUp, [&settings](bool, float intensity)
         {
             settings.position += 0.1f * intensity * settings.up;
         });
-        free.actionLookHorizontal = Input::RegisterAction(ActionType::FreeLookHorizontal, [&settings](bool, float intensity)
+        free.actionLookHorizontal = Input::registerAction(ActionType::FreeLookHorizontal, [&settings](bool, float intensity)
         {
             settings.yaw += 0.02f * intensity;
         });
-        free.actionLookVertical = Input::RegisterAction(ActionType::FreeLookVertical, [&settings](bool, float intensity)
+        free.actionLookVertical = Input::registerAction(ActionType::FreeLookVertical, [&settings](bool, float intensity)
         {
             settings.pitch += 0.02f * intensity;
         });
@@ -88,7 +90,7 @@ Logic::CameraController::CameraController(World::WorldInstance& world, Handle::E
         using namespace Engine;
         auto &settings = m_CameraSettings.viewerCameraSettings;
 
-        settings.actionViewHorizontal = Input::RegisterAction(ActionType::ViewerHorizontal, [&settings](bool, float intensity)
+        settings.actionViewHorizontal = Input::registerAction(ActionType::ViewerHorizontal, [&settings](bool, float intensity)
         {
             if(settings.isRotateModifier)
             {
@@ -99,7 +101,7 @@ Logic::CameraController::CameraController(World::WorldInstance& world, Handle::E
                     settings.lookAt -= 0.01 * settings.zoom * intensity * settings.right;
             }
         });
-        settings.actionViewVertical = Input::RegisterAction(ActionType::ViewerVertical, [&settings](bool, float intensity)
+        settings.actionViewVertical = Input::registerAction(ActionType::ViewerVertical, [&settings](bool, float intensity)
         {
             if(settings.isRotateModifier)
             {
@@ -116,26 +118,31 @@ Logic::CameraController::CameraController(World::WorldInstance& world, Handle::E
                 }
             }
         });
-        settings.actionPan = Input::RegisterAction(ActionType::ViewerPan, [&settings](bool triggered, float)
+        settings.actionPan = Input::registerAction(ActionType::ViewerPan, [&settings](bool triggered, float)
         {
             settings.isPanModifier = triggered;
         });
-        settings.actionZoom = Input::RegisterAction(ActionType::ViewerZoom, [&settings](bool triggered, float)
+        settings.actionZoom = Input::registerAction(ActionType::ViewerZoom, [&settings](bool triggered, float)
         {
             settings.isZoomModifier = triggered;
         });
-        settings.actionRotate = Input::RegisterAction(ActionType::ViewerRotate, [&settings](bool triggered, float)
+        settings.actionRotate = Input::registerAction(ActionType::ViewerRotate, [&settings](bool triggered, float)
         {
             settings.isRotateModifier = triggered;
         });
-        settings.actionClick = Input::RegisterAction(ActionType::ViewerClick, [this,&settings](bool triggered, float)
+        settings.actionClick = Input::registerAction(ActionType::ViewerClick, [this,&settings](bool triggered, float)
         {
             if(triggered)
             {
+                //constexpr int width = 1280;
+                //constexpr int height = 720;
+
+                constexpr float ratio = 720.0 / 1280.0;
+
                 constexpr float maxRayLength = 1000.0f;
                 Math::float2 mousePosition = Input::getMouseCoordinates();
 
-                Math::float3 cameraSpaceRayEndpoint = maxRayLength * Math::float3(mousePosition.x, -mousePosition.y, 1.0f );
+                Math::float3 cameraSpaceRayEndpoint = maxRayLength * Math::float3(mousePosition.x, -mousePosition.y * ratio, 1.0f );
                 Math::float3 to = m_ViewMatrix.Invert() * cameraSpaceRayEndpoint;
                 Math::float3 from = settings.lookAt + settings.zoom * settings.in;
                 Physics::RayTestResult hit = m_World.getPhysicsSystem().raytrace(from, to);
@@ -150,7 +157,7 @@ Logic::CameraController::CameraController(World::WorldInstance& world, Handle::E
                 }
             }
         });
-        settings.actionWheel = Input::RegisterAction(ActionType::ViewerMouseWheel, [&settings](bool triggered, float intensity)
+        settings.actionWheel = Input::registerAction(ActionType::ViewerMouseWheel, [&settings](bool triggered, float intensity)
         {
             if(triggered)
             {
@@ -164,7 +171,7 @@ Logic::CameraController::CameraController(World::WorldInstance& world, Handle::E
     // Disable all at first and wait until one is enabled.
     disableActions();
 
-    Engine::Input::RegisterAction(Engine::ActionType::CameraFirstPerson, [this](bool triggered, float)
+    Engine::Input::registerAction(Engine::ActionType::CameraFirstPerson, [this](bool triggered, float)
     {
         if(triggered)
         {
@@ -177,7 +184,7 @@ Logic::CameraController::CameraController(World::WorldInstance& world, Handle::E
             m_CameraSettings.firstPersonCameraSettings.actionLookVertical->setEnabled(true);
         }
     });
-    Engine::Input::RegisterAction(Engine::ActionType::CameraFree, [this](bool triggered, float)
+    Engine::Input::registerAction(Engine::ActionType::CameraFree, [this](bool triggered, float)
     {
         if(triggered)
         {
@@ -191,7 +198,7 @@ Logic::CameraController::CameraController(World::WorldInstance& world, Handle::E
             m_CameraSettings.freeCameraSettings.actionLookVertical->setEnabled(true);
         }
     });
-    Engine::Input::RegisterAction(Engine::ActionType::CameraViewer, [this](bool triggered, float)
+    Engine::Input::registerAction(Engine::ActionType::CameraViewer, [this](bool triggered, float)
     {
         if(triggered)
         {
@@ -207,7 +214,7 @@ Logic::CameraController::CameraController(World::WorldInstance& world, Handle::E
             m_CameraSettings.viewerCameraSettings.actionWheel->setEnabled(true);
         }
     });
-    Engine::Input::RegisterAction(Engine::ActionType::CameraThirdPerson, [this](bool triggered, float)
+    Engine::Input::registerAction(Engine::ActionType::CameraThirdPerson, [this](bool triggered, float)
     {
         if(triggered && m_World.getScriptEngine().getPlayerEntity().isValid())
         {
@@ -217,7 +224,7 @@ Logic::CameraController::CameraController(World::WorldInstance& world, Handle::E
         }
     });
 
-    Engine::Input::RegisterAction(Engine::ActionType::DebugMoveSpeed, [this](bool, float intensity)
+    Engine::Input::registerAction(Engine::ActionType::DebugMoveSpeed, [this](bool, float intensity)
     {
         m_moveSpeedMultiplier = 1.0 + intensity;
     });

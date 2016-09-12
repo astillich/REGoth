@@ -62,33 +62,67 @@ Logic::PlayerController::PlayerController(World::WorldInstance& world,
     m_isStrafeLeft          = false;
     m_isStrafeRight         = false;
 
-    Engine::Input::RegisterAction(Engine::ActionType::PlayerDrawWeaponMelee, [this](bool triggered, float)
+    Engine::Input::registerAction(Engine::ActionType::PlayerDrawWeaponMelee, [this](bool triggered, float)
     {
         m_isDrawWeaponMelee = triggered;
     });
-    Engine::Input::RegisterAction(Engine::ActionType::PlayerForward, [this](bool triggered, float)
+    Engine::Input::registerAction(Engine::ActionType::PlayerForward, [this](bool triggered, float)
     {
         m_isForward = triggered;
     });
-    Engine::Input::RegisterAction(Engine::ActionType::PlayerBackward, [this](bool triggered, float)
+    Engine::Input::registerAction(Engine::ActionType::PlayerBackward, [this](bool triggered, float)
     {
         m_isBackward = triggered;
     });
-    Engine::Input::RegisterAction(Engine::ActionType::PlayerTurnLeft, [this](bool triggered, float)
+    Engine::Input::registerAction(Engine::ActionType::PlayerTurnLeft, [this](bool triggered, float)
     {
         m_isTurnLeft = triggered;
     });
-    Engine::Input::RegisterAction(Engine::ActionType::PlayerTurnRight, [this](bool triggered, float)
+    Engine::Input::registerAction(Engine::ActionType::PlayerTurnRight, [this](bool triggered, float)
     {
         m_isTurnRight = triggered;
     });
-    Engine::Input::RegisterAction(Engine::ActionType::PlayerStrafeLeft, [this](bool triggered, float)
+    Engine::Input::registerAction(Engine::ActionType::PlayerStrafeLeft, [this](bool triggered, float)
     {
         m_isStrafeLeft = triggered;
     });
-    Engine::Input::RegisterAction(Engine::ActionType::PlayerStrafeRight, [this](bool triggered, float)
+    Engine::Input::registerAction(Engine::ActionType::PlayerStrafeRight, [this](bool triggered, float)
     {
         m_isStrafeRight = triggered;
+    });
+    Engine::Input::registerAction(Engine::ActionType::PlayerAttackFist, [this](bool triggered, float)
+    {
+        m_isAttackFist = triggered;
+    });
+
+    Engine::Input::registerAction(Engine::ActionType::WeaponAnimationAttackLeft, [this](bool triggered, float)
+    {
+        if(triggered)
+            m_animationType = 0;
+    });
+    Engine::Input::registerAction(Engine::ActionType::WeaponAnimationAttackRight, [this](bool triggered, float)
+    {
+        if(triggered)
+            m_animationType = 1;
+    });
+    Engine::Input::registerAction(Engine::ActionType::WeaponAnimationRun, [this](bool triggered, float)
+    {
+        if(triggered)
+            m_animationType = 2;
+    });
+    Engine::Input::registerAction(Engine::ActionType::WeaponAnimationBackpedal, [this](bool triggered, float)
+    {
+        if(triggered)
+            m_animationType = 3;
+    });
+    Engine::Input::registerAction(Engine::ActionType::WeaponAnimationAttack, [this](bool triggered, float)
+    {
+        if(triggered)
+            m_animationType = 4;
+    });
+    Engine::Input::registerAction(Engine::ActionType::DebugMoveSpeed, [this](bool, float intensity)
+    {
+        m_speedMultiplier = 1.0f + 3.0f * intensity;
     });
 }
 
@@ -625,71 +659,51 @@ void Logic::PlayerController::onUpdateByInput(float deltaTime)
 		{
 			model->setAnimation(ModelVisual::EModelAnimType::Backpedal);
 		}
-//		else if(inputGetKeyState(entry::Key::KeyQ))
-//		{
-//			model->setAnimation(ModelVisual::EModelAnimType::AttackFist);
-//		}
-		else {
+        else if(m_isAttackFist)
+        {
+            model->setAnimation(ModelVisual::EModelAnimType::AttackFist);
+        }
+        else
+        {
 			model->setAnimation(ModelVisual::Idle);
 		}
 	}
-//	else
-//	{
-//        std::map<EWeaponMode, std::vector<ModelVisual::EModelAnimType>> aniMap =
-//                {
-//                        {EWeaponMode::Weapon1h, {       ModelVisual::EModelAnimType::Attack1h_L,
-//                                                        ModelVisual::EModelAnimType::Attack1h_R,
-//                                                        ModelVisual::EModelAnimType::Run1h,
-//                                                        ModelVisual::EModelAnimType::Backpedal1h,
-//                                                        ModelVisual::EModelAnimType::Attack1h,
-//                                                        ModelVisual::EModelAnimType::Idle1h}},
+    else
+    {
+        static std::map<EWeaponMode, std::vector<ModelVisual::EModelAnimType>> aniMap =
+                {
+                        {EWeaponMode::Weapon1h, {       ModelVisual::EModelAnimType::Attack1h_L,
+                                                        ModelVisual::EModelAnimType::Attack1h_R,
+                                                        ModelVisual::EModelAnimType::Run1h,
+                                                        ModelVisual::EModelAnimType::Backpedal1h,
+                                                        ModelVisual::EModelAnimType::Attack1h,
+                                                        ModelVisual::EModelAnimType::Idle1h}},
 
-//                        {EWeaponMode::Weapon2h, {       ModelVisual::EModelAnimType::Attack2h_L,
-//                                                        ModelVisual::EModelAnimType::Attack2h_R,
-//                                                        ModelVisual::EModelAnimType::Run2h,
-//                                                        ModelVisual::EModelAnimType::Backpedal2h,
-//                                                        ModelVisual::EModelAnimType::Attack2h,
-//                                                        ModelVisual::EModelAnimType::Idle2h}},
+                        {EWeaponMode::Weapon2h, {       ModelVisual::EModelAnimType::Attack2h_L,
+                                                        ModelVisual::EModelAnimType::Attack2h_R,
+                                                        ModelVisual::EModelAnimType::Run2h,
+                                                        ModelVisual::EModelAnimType::Backpedal2h,
+                                                        ModelVisual::EModelAnimType::Attack2h,
+                                                        ModelVisual::EModelAnimType::Idle2h}},
 
-//                        {EWeaponMode::WeaponBow, {      ModelVisual::EModelAnimType::IdleBow,
-//                                                        ModelVisual::EModelAnimType::IdleBow,
-//                                                        ModelVisual::EModelAnimType::RunBow,
-//                                                        ModelVisual::EModelAnimType::BackpedalBow,
-//                                                        ModelVisual::EModelAnimType::AttackBow,
-//                                                        ModelVisual::EModelAnimType::IdleBow}},
+                        {EWeaponMode::WeaponBow, {      ModelVisual::EModelAnimType::IdleBow,
+                                                        ModelVisual::EModelAnimType::IdleBow,
+                                                        ModelVisual::EModelAnimType::RunBow,
+                                                        ModelVisual::EModelAnimType::BackpedalBow,
+                                                        ModelVisual::EModelAnimType::AttackBow,
+                                                        ModelVisual::EModelAnimType::IdleBow}},
 
-//                        {EWeaponMode::WeaponCrossBow, { ModelVisual::EModelAnimType::IdleCBow,
-//                                                        ModelVisual::EModelAnimType::IdleCBow,
-//                                                        ModelVisual::EModelAnimType::RunCBow,
-//                                                        ModelVisual::EModelAnimType::BackpedalCBow,
-//                                                        ModelVisual::EModelAnimType::AttackCBow,
-//                                                        ModelVisual::EModelAnimType::IdleCBow}}
-//                };
+                        {EWeaponMode::WeaponCrossBow, { ModelVisual::EModelAnimType::IdleCBow,
+                                                        ModelVisual::EModelAnimType::IdleCBow,
+                                                        ModelVisual::EModelAnimType::RunCBow,
+                                                        ModelVisual::EModelAnimType::BackpedalCBow,
+                                                        ModelVisual::EModelAnimType::AttackCBow,
+                                                        ModelVisual::EModelAnimType::IdleCBow}}
+                };
 
-//		if(inputGetKeyState(entry::Key::KeyA))
-//		{
-//			model->setAnimation(aniMap[m_EquipmentState.weaponMode][0]);
-//		}
-//		else if(inputGetKeyState(entry::Key::KeyD))
-//		{
-//            model->setAnimation(aniMap[m_EquipmentState.weaponMode][1]);
-//		}
-//		else if(inputGetKeyState(entry::Key::KeyW))
-//		{
-//            model->setAnimation(aniMap[m_EquipmentState.weaponMode][2]);
-//		}
-//		else if(inputGetKeyState(entry::Key::KeyS))
-//		{
-//            model->setAnimation(aniMap[m_EquipmentState.weaponMode][3]);
-//		}
-//		else if(inputGetKeyState(entry::Key::KeyQ))
-//		{
-//            model->setAnimation(aniMap[m_EquipmentState.weaponMode][4]);
-//		}
-//		else {
-//            model->setAnimation(aniMap[m_EquipmentState.weaponMode][5]);
-//		}
-//	}
+        model->setAnimation(aniMap[m_EquipmentState.weaponMode][m_animationType]);
+        m_animationType = 5;
+    }
 
     float yaw = 0.0f;
     const float turnSpeed = 2.5f;
@@ -701,9 +715,8 @@ void Logic::PlayerController::onUpdateByInput(float deltaTime)
         yaw += turnSpeed * deltaTime;
     }
 
-    // TODO: HACK, take this out!
-//    if(inputGetKeyState(entry::Key::Space))
-//        deltaTime *= 4.0f;
+    // TODO: HACK, take this out
+    deltaTime *= m_speedMultiplier;
 
     // Apply animation-velocity
     Math::float3 rootNodeVel = model->getAnimationHandler().getRootNodeVelocity() * deltaTime;

@@ -326,7 +326,7 @@ class ExampleCubes : public /*entry::AppI*/ Engine::Platform
         // process submitted rendering primitives.
         bgfx::frame();
 
-        return true;
+        return isRunning;
 	}
 
 	Engine::GameEngine* m_pEngine;

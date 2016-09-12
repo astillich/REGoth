@@ -248,5 +248,8 @@ namespace Logic
         bool m_isTurnRight;
         bool m_isStrafeLeft;
         bool m_isStrafeRight;
+        bool m_isAttackFist;
+        size_t m_animationType;
+        float m_speedMultiplier;
     };
 }
