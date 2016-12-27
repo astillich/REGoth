@@ -116,15 +116,6 @@ void ::Logic::ScriptExternals::registerStubs(Daedalus::DaedalusVM& vm, bool verb
 
     });
 
-    vm.registerExternalFunction("wld_istime", [=](Daedalus::DaedalusVM& vm){
-        if (verbose) LogInfo() << "wld_istime";
-        int32_t min2 = vm.popDataValue(); if(verbose) LogInfo() << "min2: " << min2;
-        int32_t hour2 = vm.popDataValue(); if(verbose) LogInfo() << "hour2: " << hour2;
-        int32_t min1 = vm.popDataValue(); if(verbose) LogInfo() << "min1: " << min1;
-        int32_t hour1 = vm.popDataValue(); if(verbose) LogInfo() << "hour1: " << hour1;
-        vm.setReturn(0);
-    });
-
     vm.registerExternalFunction("wld_insertnpc", [=](Daedalus::DaedalusVM& vm){
         if (verbose) LogInfo() << "wld_insertnpc";
         std::string spawnpoint = vm.popString(); if(verbose) LogInfo() << "spawnpoint: " << spawnpoint;
