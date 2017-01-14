@@ -839,7 +839,8 @@ void PlayerController::onUpdateByInput(float deltaTime)
                 LogError() << "Encountered undefined material type under NPC's feet";
                 model->setAnimation(groundAniType); // Ground animation is the default, we don't want the NPCs to start swimming in soil
             }
-            lastMovementAni = getModelVisual()->getAnimationHandler().getActiveAnimationPtr()->getModelAniHeader().aniName;
+            if (getModelVisual()->getAnimationHandler().getActiveAnimationPtr())
+                lastMovementAni = getModelVisual()->getAnimationHandler().getActiveAnimationPtr()->getModelAniHeader().aniName;
             m_NoAniRootPosHack = true;
         };
         if (m_isStrafeLeft)
