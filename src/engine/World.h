@@ -247,11 +247,6 @@ namespace World
             return m_AnimationLibrary;
         }
 
-        Animations::AnimationLibrary& getAnimationLibrary()
-        {
-            return m_AnimationLibrary;
-        }
-
         /**
 		 * This worlds print-screen manager
 		 */
