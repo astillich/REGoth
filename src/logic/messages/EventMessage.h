@@ -23,7 +23,11 @@ namespace Logic
             Manipulate,
             Conversation,
             Magic,
-            Mob
+            Mob,
+
+            SndPlay,
+            SndStarted,
+            SndStopped
         };
 
         /**
